@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+var util = require('mace');
+var fs = require('fs');
+var CHARSET = 'UTF-8';
+var Clam = require('../');
+
+process.stdout.setEncoding(CHARSET);
+process.stdin.setEncoding(CHARSET);
+process.stderr.setEncoding(CHARSET);
+
+var info = require('../package.json');
+
+var project = util.Command(info.name, info.description, info.version)
+  .option('-h, --help  [cmd]', 'About ' + info.name + ' help info.')
+  .option('-v, --version', 'The ' + info.name + ' version')
+  .option('-r, --root  [rootdir]', "Set the project rootdir", process.cwd())
+  .command('on', 'Start the clam server with some extended plugs')
+  .option('-M, --no-mock', 'Don\'t use mock server', false)
+  .option('-P, --no-proxy', 'Don\'t start proxy server', true)
+  .option('-D, --no-debug', 'Don\'t inject debug script', true)
+  .action(Clam.on)
+  .command('doc', "out put doc")
+  .option('-t, --type [type]', 'Out put file with type', '.md')
+  .action(Clam.doc)
+  .command('init', "Init clam project")
+  .action(Clam.init)
+.action(function (version, cmd) {
+  if (version) {
+    return util.logue('version: %s', version);
+  }
+  project.help(cmd);
+});
+project.parse(process.argv);
